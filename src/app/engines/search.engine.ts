@@ -1,6 +1,5 @@
 import * as path from 'path';
 import * as fs from 'fs-extra';
-import * as Handlebars from 'handlebars';
 import { logger } from '../../logger';
 import { Configuration } from '../configuration';
 import { ConfigurationInterface } from '../interfaces/configuration.interface';
@@ -14,7 +13,9 @@ export class SearchEngine {
     public searchIndex: any;
     public documentsStore: Object = {};
     public indexSize: number;
-    constructor(private configuration: ConfigurationInterface) {}
+    constructor(
+        private configuration: ConfigurationInterface,
+        private handleBars) {}
 
     private getSearchIndex() {
         if (!this.searchIndex) {
@@ -54,7 +55,7 @@ export class SearchEngine {
                if (err) {
                    reject('Error during search index generation');
                } else {
-                   let template: any = Handlebars.compile(data);
+                   let template: any = this.handleBars.compile(data);
                    let result = template({
                            index: JSON.stringify(this.getSearchIndex()),
                            store: JSON.stringify(this.documentsStore)

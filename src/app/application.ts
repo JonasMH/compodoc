@@ -32,6 +32,7 @@ import { promiseSequential } from '../utils/promise-sequential';
 import { DependenciesEngine } from './engines/dependencies.engine';
 
 let pkg = require('../package.json');
+const promisedHandlebars = require('promised-handlebars');
 let cwd = process.cwd();
 let $fileengine = new FileEngine();
 let $markdownengine = new MarkdownEngine();
@@ -64,6 +65,8 @@ export class Application {
     private ngdEngine: NgdEngine;
     private htmlEngine: HtmlEngine;
     private searchEngine: SearchEngine;
+    private routerParser: RouterParser = new RouterParser();
+    private handleBars = promisedHandlebars(require('handlebars'));
 
     /**
      * Create a new compodoc application instance.
@@ -74,8 +77,8 @@ export class Application {
         this.configuration = new Configuration();
         this.dependenciesEngine = new DependenciesEngine();
         this.ngdEngine = new NgdEngine(this.dependenciesEngine);
-        this.htmlEngine = new HtmlEngine(this.configuration, this.dependenciesEngine);
-        this.searchEngine = new SearchEngine(this.configuration);
+        this.htmlEngine = new HtmlEngine(this.handleBars, this.configuration, this.dependenciesEngine);
+        this.searchEngine = new SearchEngine(this.configuration, this.handleBars);
 
         for (let option in options) {
             if (typeof this.configuration.mainData[option] !== 'undefined') {
@@ -280,7 +283,8 @@ export class Application {
             this.updatedFiles, {
                 tsconfigDirectory: path.dirname(this.configuration.mainData.tsconfig)
             },
-            this.configuration
+            this.configuration,
+            this.routerParser
         );
 
         let dependenciesData = crawler.getDependencies();
@@ -321,14 +325,15 @@ export class Application {
             this.files, {
                 tsconfigDirectory: path.dirname(this.configuration.mainData.tsconfig)
             },
-            this.configuration
+            this.configuration,
+            this.routerParser
         );
 
         let dependenciesData = crawler.getDependencies();
 
         this.dependenciesEngine.init(dependenciesData);
 
-        this.configuration.mainData.routesLength = RouterParser.routesLength();
+        this.configuration.mainData.routesLength = this.routerParser.routesLength();
 
         this.printStatistics();
 
@@ -933,13 +938,16 @@ export class Application {
                 pageType: COMPODOC_DEFAULTS.PAGE_TYPES.ROOT
             });
 
-            RouterParser.generateRoutesIndex(this.configuration.mainData.output, this.configuration.mainData.routes).then(() => {
-                logger.info(' Routes index generated');
-                resolve();
-            }, (e) => {
-                logger.error(e);
-                reject();
-            });
+            this.routerParser.generateRoutesIndex(
+                this.configuration.mainData.output,
+                this.configuration.mainData.routes,
+                this.handleBars).then(() => {
+                    logger.info(' Routes index generated');
+                    resolve();
+                }, (e) => {
+                    logger.error(e);
+                    reject();
+                });
 
         });
     }
@@ -1333,28 +1341,30 @@ export class Application {
             pages.map((page, i) => {
                 return new Promise((resolve, reject) => {
                     logger.info('Process page', page.name);
-                    let htmlData = this.htmlEngine.render(this.configuration.mainData, page);
-                    let finalPath = this.configuration.mainData.output;
-                    if (this.configuration.mainData.output.lastIndexOf('/') === -1) {
-                        finalPath += '/';
-                    }
-                    if (page.path) {
-                        finalPath += page.path + '/';
-                    }
-                    finalPath += page.name + '.html';
-                    this.searchEngine.indexPage({
-                        infos: page,
-                        rawData: htmlData,
-                        url: finalPath
-                    });
-                    fs.outputFile(path.resolve(finalPath), htmlData, function (err) {
-                        if (err) {
-                            logger.error('Error during ' + page.name + ' page generation');
-                            reject();
-                        } else {
-                            resolve();
-                        }
-                    });
+                    this.htmlEngine.render(this.configuration.mainData, page)
+                        .then((htmlData) => {
+                            let finalPath = this.configuration.mainData.output;
+                            if (this.configuration.mainData.output.lastIndexOf('/') === -1) {
+                                finalPath += '/';
+                            }
+                            if (page.path) {
+                                finalPath += page.path + '/';
+                            }
+                            finalPath += page.name + '.html';
+                            this.searchEngine.indexPage({
+                                infos: page,
+                                rawData: htmlData,
+                                url: finalPath
+                            });
+                            fs.outputFile(path.resolve(finalPath), htmlData, function (err) {
+                                if (err) {
+                                    logger.error('Error during ' + page.name + ' page generation');
+                                    reject();
+                                } else {
+                                    resolve();
+                                }
+                            });
+                        });
                 });
             })).then(() => {
                 this.searchEngine.generateSearchIndexJson(this.configuration.mainData.output).then(() => {
@@ -1382,28 +1392,30 @@ export class Application {
             pages.map((page, i) => {
                 return new Promise((resolve, reject) => {
                     logger.info('Process page', pages[i].name);
-                    let htmlData = this.htmlEngine.render(this.configuration.mainData, pages[i]);
-                    let finalPath = this.configuration.mainData.output;
-                    if (this.configuration.mainData.output.lastIndexOf('/') === -1) {
-                        finalPath += '/';
-                    }
-                    if (pages[i].path) {
-                        finalPath += pages[i].path + '/';
-                    }
-                    finalPath += pages[i].filename + '.html';
-                    this.searchEngine.indexPage({
-                        infos: pages[i],
-                        rawData: htmlData,
-                        url: finalPath
-                    });
-                    fs.outputFile(path.resolve(finalPath), htmlData, function (err) {
-                        if (err) {
-                            logger.error('Error during ' + pages[i].name + ' page generation');
-                            reject();
-                        } else {
-                            resolve();
-                        }
-                    });
+                    this.htmlEngine.render(this.configuration.mainData, pages[i])
+                        .then(htmlData => {
+                            let finalPath = this.configuration.mainData.output;
+                            if (this.configuration.mainData.output.lastIndexOf('/') === -1) {
+                                finalPath += '/';
+                            }
+                            if (pages[i].path) {
+                                finalPath += pages[i].path + '/';
+                            }
+                            finalPath += pages[i].filename + '.html';
+                            this.searchEngine.indexPage({
+                                infos: pages[i],
+                                rawData: htmlData,
+                                url: finalPath
+                            });
+                            fs.outputFile(path.resolve(finalPath), htmlData, function (err) {
+                                if (err) {
+                                    logger.error('Error during ' + pages[i].name + ' page generation');
+                                    reject();
+                                } else {
+                                    resolve();
+                                }
+                            });
+                        });
                 });
             })
         ).then(() => {

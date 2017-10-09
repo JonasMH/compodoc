@@ -2,6 +2,7 @@ import { JSDocTagsParser } from '../../../../utils/jsdoc.parser';
 import { getNamesCompareFn, mergeTagsAndArgs, markedtags } from '../../../../utils/utils';
 import { kindToType } from '../../../../utils/kind-to-type';
 import { Configuration } from '../../../configuration';
+import { ConfigurationInterface } from '../../../interfaces/configuration.interface';
 
 import * as _ from 'lodash';
 

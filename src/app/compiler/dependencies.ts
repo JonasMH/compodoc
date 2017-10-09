@@ -56,7 +56,8 @@ export class Dependencies {
     constructor(
         files: string[],
         options: any,
-        private configuration: ConfigurationInterface) {
+        private configuration: ConfigurationInterface,
+        private routerParser: RouterParser) {
         this.files = files;
         const transpileOptions = {
             target: ts.ScriptTarget.ES5,
@@ -183,10 +184,10 @@ export class Dependencies {
 
         // $componentsTreeEngine.createTreesForComponents();
 
-        RouterParser.linkModulesAndRoutes();
-        RouterParser.constructModulesTree();
+        this.routerParser.linkModulesAndRoutes();
+        this.routerParser.constructModulesTree();
 
-        deps.routesTree = RouterParser.constructRoutesTree();
+        deps.routesTree = this.routerParser.constructRoutesTree();
 
         return deps;
     }
@@ -252,10 +253,10 @@ export class Dependencies {
                     if (this.isModule(metadata)) {
                         const moduleDep = new ModuleDepFactory(this.moduleHelper)
                             .create(file, srcFile, name, props, IO);
-                        if (RouterParser.hasRouterModuleInImports(moduleDep.imports)) {
-                            RouterParser.addModuleWithRoutes(name, this.moduleHelper.getModuleImportsRaw(props), file);
+                        if (this.routerParser.hasRouterModuleInImports(moduleDep.imports)) {
+                            this.routerParser.addModuleWithRoutes(name, this.moduleHelper.getModuleImportsRaw(props), file);
                         }
-                        RouterParser.addModule(name, moduleDep.imports);
+                        this.routerParser.addModule(name, moduleDep.imports);
                         outputSymbols.modules.push(moduleDep);
                         outputSymbols.modulesForGraph.push(moduleDep);
                         deps = moduleDep;
@@ -425,12 +426,12 @@ export class Dependencies {
                 if (IO.routes) {
                     let newRoutes;
                     try {
-                        newRoutes = RouterParser.cleanRawRouteParsed(IO.routes);
+                        newRoutes = this.routerParser.cleanRawRouteParsed(IO.routes);
                     } catch (e) {
                         // tslint:disable-next-line:max-line-length
                         logger.error('Routes parsing error, maybe a trailing comma or an external variable, trying to fix that later after sources scanning.');
                         newRoutes = IO.routes.replace(/ /gm, '');
-                        RouterParser.addIncompleteRoute({
+                        this.routerParser.addIncompleteRoute({
                             data: newRoutes,
                             file: file
                         });
@@ -472,7 +473,7 @@ export class Dependencies {
                                 });
                             }
                             if (rootModule) {
-                                RouterParser.setRootModule(rootModule);
+                                this.routerParser.setRootModule(rootModule);
                             }
                         }
                     }
@@ -844,9 +845,9 @@ export class Dependencies {
                     if (node.declarationList.declarations[i].type.typeName &&
                         node.declarationList.declarations[i].type.typeName.text === 'Routes') {
                         let data = generate(node.declarationList.declarations[i].initializer);
-                        RouterParser.addRoute({
+                        this.routerParser.addRoute({
                             name: node.declarationList.declarations[i].name.text,
-                            data: RouterParser.cleanRawRoute(data),
+                            data: this.routerParser.cleanRawRoute(data),
                             filename: fileName
                         });
                         return [{

@@ -1,6 +1,6 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import * as Handlebars from 'handlebars';
+
 import { logger } from '../../logger';
 import { HtmlEngineHelpers } from './html.engine.helpers';
 import { DependenciesEngine } from './dependencies.engine';
@@ -10,11 +10,12 @@ export class HtmlEngine {
     private cache: { page: any } = {} as any;
 
     constructor(
+        private handlebars,
         configuration: ConfigurationInterface,
         dependenciesEngine: DependenciesEngine) {
 
         const helper = new HtmlEngineHelpers();
-        helper.registerHelpers(Handlebars, configuration, dependenciesEngine);
+        helper.registerHelpers(handlebars, configuration, dependenciesEngine);
     }
 
     public init(): Promise<void> {
@@ -62,7 +63,7 @@ export class HtmlEngine {
             if (i <= len - 1) {
                 fs.readFile(path.resolve(__dirname + '/../src/templates/partials/' + partials[i] + '.hbs'), 'utf8', (err, data) => {
                     if (err) { reject(); }
-                    Handlebars.registerPartial(partials[i], data);
+                    this.handlebars.registerPartial(partials[i], data);
                     i++;
                     loop(resolve, reject);
                 });
@@ -83,14 +84,17 @@ export class HtmlEngine {
             loop(resolve, reject);
         });
     }
-    public render(mainData: any, page: any): Object {
+
+    public render(mainData: any, page: any): Promise<string> {
         let o = mainData;
         (Object as any).assign(o, page);
 
-        let template: any = Handlebars.compile(this.cache.page);
-        return template({
+        let template: any = this.handlebars.compile(this.cache.page);
+        let result = template({
             data: o
         });
+
+        return result;
     }
 
     public generateCoverageBadge(outputFolder, coverageData) {
@@ -99,7 +103,7 @@ export class HtmlEngine {
                 if (err) {
                     reject('Error during coverage badge generation');
                 } else {
-                    let template: any = Handlebars.compile(data);
+                    let template: any = this.handlebars.compile(data);
                     let result = template({
                         data: coverageData
                     });

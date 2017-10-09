@@ -71,6 +71,7 @@
     "lunr": "1.0.0",
     "marked": "^0.3.6",
     "os-name": "^2.0.1",
+    "promised-handlebars": "^2.0.1",
     "shelljs": "^0.7.8",
     "typescript": "2.5.3"
   },

@@ -91,13 +91,13 @@ export class MarkdownEngine {
         });
     }
 
-    private readNeighbourReadmeFile(file: string) {
+    public readNeighbourReadmeFile(file: string): string {
         let dirname = path.dirname(file);
         let readmeFile = dirname + path.sep + path.basename(file, '.ts') + '.md';
         return fs.readFileSync(readmeFile, 'utf8');
     }
 
-    private hasNeighbourReadmeFile(file: string): boolean {
+    public hasNeighbourReadmeFile(file: string): boolean {
         let dirname = path.dirname(file);
         let readmeFile = dirname + path.sep + path.basename(file, '.ts') + '.md';
         return fs.existsSync(readmeFile);

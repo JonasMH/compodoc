@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 
 /**
  * The home component
+ * @diagram ./home-flow.diagram.uml
  */
 @Component({
     selector: 'home',
@@ -9,6 +10,6 @@ import { Component } from '@angular/core';
 })
 export class HomeComponent {
     public showTab() {
-      
+
     }
 }

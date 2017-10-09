@@ -31,6 +31,7 @@ import { IndexableSignatureHelper } from './html-engine-helpers/indexable-signat
 import { ObjectHelper } from './html-engine-helpers/object.helper';
 import { ParseDescriptionHelper } from './html-engine-helpers/parse-description.helper';
 import { ConfigurationInterface } from '../interfaces/configuration.interface';
+import { JsdocDiagramCommentHelper } from './html-engine-helpers/jsdoc-diagram.helper';
 
 
 export class HtmlEngineHelpers {
@@ -60,6 +61,7 @@ export class HtmlEngineHelpers {
         this.registerHelper(bars, 'jsdoc-params', new JsdocParamsHelper());
         this.registerHelper(bars, 'jsdoc-params-valid', new JsdocParamsValidHelper());
         this.registerHelper(bars, 'jsdoc-default', new JsdocDefaultHelper());
+        this.registerHelper(bars, 'jsdoc-diagram', new JsdocDiagramCommentHelper());
         this.registerHelper(bars, 'linkType', new LinkTypeHelper(configuration, dependenciesEngine));
         this.registerHelper(bars, 'indexableSignature', new IndexableSignatureHelper());
         this.registerHelper(bars, 'object', new ObjectHelper());
@@ -67,7 +69,7 @@ export class HtmlEngineHelpers {
     }
 
     private registerHelper(bars, key: string, helper: IHtmlEngineHelper) {
-        Handlebars.registerHelper(key, function() {
+        bars.registerHelper(key, function() {
             // tslint:disable-next-line:no-invalid-this
             return helper.helperFunc.apply(helper, [this, ..._.slice(arguments as any)]);
         });
