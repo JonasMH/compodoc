@@ -47,11 +47,16 @@
             {{/each}}
         {{/jsdoc-code-example}}
     </div>
-    {{#jsdoc-diagram component.jsdoctags}}
-    <p class="comment">
-        <h3>Diagram(s)</h3>
-    </p>
-    <img src="data:image/jpeg;base64,{{{base64Img}}}"></div>
+
+    {{#jsdoc-diagram component.jsdoctags component.file }}
+        <p class="comment">
+            <h3>Diagram(s)</h3>
+        </p>
+        {{#each diagrams}}
+            <div>
+                <img src="data:image/jpeg;base64,{{{base64Img}}}"></div>
+            </div>
+        {{/each}}
     {{/jsdoc-diagram}}
 {{/if}}
 

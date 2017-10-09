@@ -9,19 +9,32 @@ export class JsdocDiagramCommentHelper implements IHtmlEngineHelper {
 
     }
 
-    public helperFunc(context: any, jsdocTags: Array<JsdocTagInterface>, options: IHandlebarsOptions) {
-        let result = jsdocTags
+    /**
+     * @param context Handlebar context
+     * @param jsdocTags list of tags
+     * @param file file, ex: test/src/todomvc-ng2/src/app/home/home.component.ts
+     */
+    public helperFunc(context: any, jsdocTags: Array<JsdocTagInterface>, file: string, options: IHandlebarsOptions) {
+        let results = jsdocTags
             .filter(x => x.tagName)
-            .find(x => x.tagName.text === 'diagram');
+            .filter(x => x.tagName.text === 'diagram');
 
-        if (!result) {
+        if (results.length === 0) {
             return undefined;
         }
 
-        const data = fs.readFileSync('test/src/todomvc-ng2/src/app/home/' + result.comment);
-        return this.plantUmlService.getDiagramFromPlantUml(data.toString())
-            .then((image) => {
-                context.base64Img = image.toString('base64');
+        let fileFolder = file.substring(0, file.lastIndexOf('/') + 1);
+        context.diagrams = new Array();
+
+        let promises = results.map(x => {
+            const data = fs.readFileSync(fileFolder + x.comment);
+            return this.plantUmlService
+                .getDiagramFromPlantUml(data.toString())
+                .then((image) => context.diagrams.push({base64Img: image.toString('base64')}));
+        });
+
+        return Promise.all(promises)
+            .then(x => {
                 return options.fn(context);
             });
     }
