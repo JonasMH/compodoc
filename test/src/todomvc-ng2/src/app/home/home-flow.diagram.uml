@@ -1,4 +1,5 @@
 @startuml
+title Some title
 
 Bob->Alice: hello
 Alice->Bob: Nice to see you

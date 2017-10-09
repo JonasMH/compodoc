@@ -35,6 +35,7 @@ class Logger {
 		this.logger(
 			this.format(LEVEL.ERROR, ...args)
 		);
+		console.trace();
 	}
 
 	public warn(...args) {

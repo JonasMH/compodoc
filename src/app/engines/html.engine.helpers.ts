@@ -31,7 +31,9 @@ import { IndexableSignatureHelper } from './html-engine-helpers/indexable-signat
 import { ObjectHelper } from './html-engine-helpers/object.helper';
 import { ParseDescriptionHelper } from './html-engine-helpers/parse-description.helper';
 import { ConfigurationInterface } from '../interfaces/configuration.interface';
-import { JsdocDiagramCommentHelper } from './html-engine-helpers/jsdoc-diagram.helper';
+import { JsdocDiagramCommentHelper } from '../diagrams/jsdoc-diagram.helper';
+import { PlantUmlWebProvider } from '../diagrams/plant-uml-web.provider';
+import { PlantUmlLocalProvider } from '../diagrams/plant-uml-local.provider';
 
 
 export class HtmlEngineHelpers {
@@ -52,7 +54,7 @@ export class HtmlEngineHelpers {
         this.registerHelper(bars, 'clean-paragraph', new CleanParagraphHelper());
         this.registerHelper(bars, 'escapeSimpleQuote', new EscapeSimpleQuoteHelper());
         this.registerHelper(bars, 'breakComma', new BreakCommaHelper(bars));
-        this.registerHelper(bars, 'modifKind', new ModifKindHelper());
+        this.registerHelper(bars, 'modifKind', new ModifKindHelper());22;
         this.registerHelper(bars, 'modifIcon', new ModifIconHelper());
         this.registerHelper(bars, 'relativeURL', new RelativeURLHelper());
         this.registerHelper(bars, 'jsdoc-returns-comment', new JsdocReturnsCommentHelper());
@@ -61,7 +63,7 @@ export class HtmlEngineHelpers {
         this.registerHelper(bars, 'jsdoc-params', new JsdocParamsHelper());
         this.registerHelper(bars, 'jsdoc-params-valid', new JsdocParamsValidHelper());
         this.registerHelper(bars, 'jsdoc-default', new JsdocDefaultHelper());
-        this.registerHelper(bars, 'jsdoc-diagram', new JsdocDiagramCommentHelper());
+        this.registerHelper(bars, 'jsdoc-diagram', new JsdocDiagramCommentHelper(new PlantUmlLocalProvider()));
         this.registerHelper(bars, 'linkType', new LinkTypeHelper(configuration, dependenciesEngine));
         this.registerHelper(bars, 'indexableSignature', new IndexableSignatureHelper());
         this.registerHelper(bars, 'object', new ObjectHelper());

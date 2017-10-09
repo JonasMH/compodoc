@@ -1,4 +1,6 @@
 @startuml
+title Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+
 Alice -> Bob: Authentication Request
 
 alt successful case

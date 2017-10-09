@@ -221,10 +221,10 @@ export class CliApplication extends Application
 
                         ExcludeParser.init(exclude, cwd);
 
-                        var finder = require('findit')(cwd || '.');
+                        let finder = require('findit')(cwd || '.');
 
                         finder.on('directory', function (dir, stat, stop) {
-                            var base = path.basename(dir);
+                            let base = path.basename(dir);
                             if (base === '.git' || base === 'node_modules') stop()
                         });
 
@@ -276,10 +276,10 @@ export class CliApplication extends Application
 
                         ExcludeParser.init(exclude, cwd);
 
-                        var finder = require('findit')(cwd || '.');
+                        let finder = require('findit')(cwd || '.');
 
                         finder.on('directory', function (dir, stat, stop) {
-                            var base = path.basename(dir);
+                            let base = path.basename(dir);
                             if (base === '.git' || base === 'node_modules') stop()
                         });
 
@@ -323,7 +323,7 @@ export class CliApplication extends Application
 
                         ExcludeParser.init(exclude, cwd);
 
-                        var finder = require('findit')(path.resolve(sourceFolder));
+                        let finder = require('findit')(path.resolve(sourceFolder));
 
                         finder.on('directory', function (dir, stat, stop) {
                             let base = path.basename(dir);
