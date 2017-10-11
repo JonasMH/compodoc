@@ -3,8 +3,7 @@ import { NodeObject } from '../node-object.interface';
 import { ModuleHelper } from './helpers/module-helper';
 import { NsModuleCache } from './helpers/symbol-helper';
 import { ComponentCache } from './helpers/component-helper';
-const ts = require('typescript');
-
+import * as ts from 'typescript';
 
 
 export class ModuleDepFactory {

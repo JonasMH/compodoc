@@ -5,9 +5,9 @@ import { Configuration } from '../../../configuration';
 import { ConfigurationInterface } from '../../../interfaces/configuration.interface';
 
 import * as _ from 'lodash';
+import * as ts from 'typescript';
 
 const marked = require('marked');
-const ts = require('typescript');
 
 export class ClassHelper {
 
@@ -131,8 +131,8 @@ export class ClassHelper {
         let extendsElement;
         let jsdoctags = [];
 
-        if (typeof ts.getClassImplementsHeritageClauseElements !== 'undefined') {
-            let implementedTypes = ts.getClassImplementsHeritageClauseElements(classDeclaration);
+        if ((typeof ts as any).getClassImplementsHeritageClauseElements !== 'undefined') {
+            let implementedTypes = (typeof ts as any).getClassImplementsHeritageClauseElements(classDeclaration);
             if (implementedTypes) {
                 let i = 0;
                 let len = implementedTypes.length;
@@ -144,8 +144,8 @@ export class ClassHelper {
             }
         }
 
-        if (typeof ts.getClassExtendsHeritageClauseElement !== 'undefined') {
-            let extendsTypes = ts.getClassExtendsHeritageClauseElement(classDeclaration);
+        if (typeof (typeof ts as any).getClassExtendsHeritageClauseElement !== 'undefined') {
+            let extendsTypes = (typeof ts as any).getClassExtendsHeritageClauseElement(classDeclaration);
             if (extendsTypes) {
                 if (extendsTypes.expression) {
                     extendsElement = extendsTypes.expression.text;
@@ -383,7 +383,7 @@ export class ClassHelper {
             returnType: this.visitType(method.type),
             line: this.getPosition(method, sourceFile).line + 1
         };
-        let jsdoctags = JSDocTagsParser.getJSDocs(method);
+        let jsdoctags: Array<any> = JSDocTagsParser.getJSDocs(method);
         if (jsdoctags && jsdoctags.length >= 1) {
             if (jsdoctags[0].tags) {
                 result.jsdoctags = markedtags(jsdoctags[0].tags);
@@ -445,7 +445,7 @@ export class ClassHelper {
             args: method.parameters ? method.parameters.map((prop) => this.visitArgument(prop)) : [],
             line: this.getPosition(method, sourceFile).line + 1
         };
-        let jsdoctags = JSDocTagsParser.getJSDocs(method);
+        let jsdoctags: Array<any> = JSDocTagsParser.getJSDocs(method);
 
         if (method.symbol) {
             result.description = marked(ts.displayPartsToString(method.symbol.getDocumentationComment()));
@@ -637,7 +637,7 @@ export class ClassHelper {
             returnType: this.visitType(method.type),
             line: this.getPosition(method, sourceFile).line + 1
         };
-        let jsdoctags = JSDocTagsParser.getJSDocs(method);
+        let jsdoctags: Array<any> = JSDocTagsParser.getJSDocs(method);
 
         if (typeof method.type === 'undefined') {
             // Try to get inferred type

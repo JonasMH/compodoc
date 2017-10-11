@@ -3,11 +3,10 @@ import * as fs from 'fs-extra';
 import * as Shelljs from 'shelljs';
 import * as util from 'util';
 import * as _ from 'lodash';
+import * as ngdT from '@compodoc/ngd-transformer';
 
 import isGlobal from '../../utils/global.path';
 import { DependenciesEngine } from './dependencies.engine';
-
-const ngdT = require('@compodoc/ngd-transformer');
 
 export class NgdEngine {
     public engine;

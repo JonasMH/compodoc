@@ -1,4 +1,4 @@
-const ts = require('typescript');
+import * as ts from 'typescript';
 import { SymbolHelper, NsModuleCache } from './symbol-helper';
 import { NodeObject } from '../../node-object.interface';
 import { detectIndent } from '../../../../utilities';

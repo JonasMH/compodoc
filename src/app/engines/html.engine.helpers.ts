@@ -32,7 +32,6 @@ import { ObjectHelper } from './html-engine-helpers/object.helper';
 import { ParseDescriptionHelper } from './html-engine-helpers/parse-description.helper';
 import { ConfigurationInterface } from '../interfaces/configuration.interface';
 import { JsdocDiagramCommentHelper } from '../diagrams/jsdoc-diagram.helper';
-import { PlantUmlWebProvider } from '../diagrams/plant-uml-web.provider';
 import { PlantUmlLocalProvider } from '../diagrams/plant-uml-local.provider';
 
 
@@ -63,7 +62,7 @@ export class HtmlEngineHelpers {
         this.registerHelper(bars, 'jsdoc-params', new JsdocParamsHelper());
         this.registerHelper(bars, 'jsdoc-params-valid', new JsdocParamsValidHelper());
         this.registerHelper(bars, 'jsdoc-default', new JsdocDefaultHelper());
-        this.registerHelper(bars, 'jsdoc-diagram', new JsdocDiagramCommentHelper(new PlantUmlLocalProvider()));
+        this.registerHelper(bars, 'jsdoc-diagram', new JsdocDiagramCommentHelper(new PlantUmlLocalProvider(configuration), configuration));
         this.registerHelper(bars, 'linkType', new LinkTypeHelper(configuration, dependenciesEngine));
         this.registerHelper(bars, 'indexableSignature', new IndexableSignatureHelper());
         this.registerHelper(bars, 'object', new ObjectHelper());

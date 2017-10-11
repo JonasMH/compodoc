@@ -1,16 +1,16 @@
 import * as path from 'path';
 import * as fs from 'fs-extra';
+import * as ts from 'typescript';
+import * as _ from 'lodash';
 
 import { LinkParser } from './link-parser';
 
 import { AngularLifecycleHooks } from './angular-lifecycles-hooks';
 
-const ts = require('typescript'),
-      getCurrentDirectory = ts.sys.getCurrentDirectory,
-      useCaseSensitiveFileNames = ts.sys.useCaseSensitiveFileNames,
-      newLine = ts.sys.newLine,
-      marked = require('marked'),
-      _ = require('lodash');
+const getCurrentDirectory = ts.sys.getCurrentDirectory;
+const useCaseSensitiveFileNames = ts.sys.useCaseSensitiveFileNames;
+const newLine = ts.sys.newLine;
+const marked = require('marked');
 
 export function getNewLine(): string {
     return newLine;
@@ -24,24 +24,24 @@ export const formatDiagnosticsHost: ts.FormatDiagnosticsHost = {
     getCurrentDirectory,
     getCanonicalFileName,
     getNewLine
-}
+};
 
 export function markedtags(tags) {
-    var mtags = tags;
-    _.forEach(mtags, (tag) => {
+    let mtags = tags;
+    _.forEach(mtags, (tag: any) => {
         tag.comment = marked(LinkParser.resolveLinks(tag.comment));
     });
     return mtags;
-};
+}
 
 export function mergeTagsAndArgs(args, jsdoctags?) {
-    var margs = _.cloneDeep(args);
-    _.forEach(margs, (arg) => {
+    let margs = _.cloneDeep(args);
+    _.forEach(margs, (arg: any) => {
         arg.tagName = {
             text: 'param'
         };
         if (jsdoctags) {
-            _.forEach(jsdoctags, (jsdoctag) => {
+            _.forEach(jsdoctags, (jsdoctag: any) => {
                 if (jsdoctag.name && jsdoctag.name.text === arg.name) {
                     arg.tagName = jsdoctag.tagName;
                     arg.name = jsdoctag.name;
@@ -53,7 +53,7 @@ export function mergeTagsAndArgs(args, jsdoctags?) {
     });
     // Add example & returns
     if (jsdoctags) {
-        _.forEach(jsdoctags, (jsdoctag) => {
+        _.forEach(jsdoctags, (jsdoctag: any) => {
             if (jsdoctag.tagName && jsdoctag.tagName.text === 'example') {
                 margs.push({
                     tagName: jsdoctag.tagName,
@@ -78,13 +78,13 @@ export function readConfig(configFile: string): any {
         throw new Error(message);
     }
     return result.config;
-};
+}
 
 export function stripBom(source: string): string {
     if (source.charCodeAt(0) === 0xFEFF) {
-		return source.slice(1);
-	}
-	   return source;
+        return source.slice(1);
+    }
+    return source;
 }
 
 export function hasBom(source: string): boolean {
@@ -92,11 +92,8 @@ export function hasBom(source: string): boolean {
 }
 
 export function handlePath(files: string[], cwd: string): string[] {
-    let _files = files,
-        i = 0,
-        len = files.length;
-
-    for(i; i<len; i++) {
+    let _files = files;
+    for (let i = 0; i < files.length; i++) {
         if (files[i].indexOf(cwd) === -1) {
             files[i] = path.resolve(cwd + path.sep + files[i]);
         }
@@ -106,11 +103,11 @@ export function handlePath(files: string[], cwd: string): string[] {
 }
 
 export function cleanLifecycleHooksFromMethods(methods) {
-    let result = [],
-        i = 0,
-        len = methods.length;
+    let result = [];
+    let i = 0;
+    let len = methods.length;
 
-    for(i; i<len; i++) {
+    for (i; i < len; i++) {
         if (!(methods[i].name in AngularLifecycleHooks)) {
             result.push(methods[i]);
         }
@@ -121,7 +118,7 @@ export function cleanLifecycleHooksFromMethods(methods) {
 
 export function cleanSourcesForWatch(list) {
     return list.filter((element) => {
-        if(fs.existsSync(process.cwd() + path.sep + element)) {
+        if (fs.existsSync(process.cwd() + path.sep + element)) {
             return element;
         }
     });

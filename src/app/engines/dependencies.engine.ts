@@ -26,7 +26,7 @@ export class DependenciesEngine {
     public directives: Object[];
     public injectables: Object[];
     public interfaces: Object[];
-    public routes: Object[];
+    public routes: any;
     public pipes: Object[];
     public classes: Object[];
     public miscellaneous: MiscellaneousData;

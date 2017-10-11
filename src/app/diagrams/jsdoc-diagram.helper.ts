@@ -1,10 +1,13 @@
 import { IHtmlEngineHelper, IHandlebarsOptions } from '../engines/html-engine-helpers/html-engine-helper.interface';
 import { IPlantUmlProvider } from './plant-uml-provider.interface';
 import { JsdocTagInterface } from '../interfaces/jsdoc-tag.interface';
+import { ConfigurationInterface } from '../interfaces/configuration.interface';
 
 
 export class JsdocDiagramCommentHelper implements IHtmlEngineHelper {
-    constructor(private plantUmlService: IPlantUmlProvider) {
+    constructor(
+        private plantUmlService: IPlantUmlProvider,
+        private configuration: ConfigurationInterface) {
 
     }
 
@@ -14,6 +17,11 @@ export class JsdocDiagramCommentHelper implements IHtmlEngineHelper {
      * @param file file, ex: test/src/todomvc-ng2/src/app/home/home.component.ts
      */
     public helperFunc(context: any, jsdocTags: Array<JsdocTagInterface>, file: string, options: IHandlebarsOptions) {
+        if (this.configuration.mainData.diagramOptions ||
+            !this.configuration.mainData.diagramOptions.enabled) {
+            return undefined;
+        }
+
         let results = jsdocTags
             .filter(x => x.tagName)
             .filter(x => x.tagName.text === 'diagram');
@@ -28,7 +36,7 @@ export class JsdocDiagramCommentHelper implements IHtmlEngineHelper {
         let promises = results.map(x => {
             return this.plantUmlService
                 .getDiagram(fileFolder + x.comment)
-                .then((image) => context.diagrams.push({base64Img: image.toString('base64')}));
+                .then((image) => context.diagrams.push({ base64Img: image.toString('base64') }));
         });
 
         return Promise.all(promises)

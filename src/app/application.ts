@@ -1,9 +1,8 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import * as LiveServer from 'live-server';
 import * as Shelljs from 'shelljs';
 import * as _ from 'lodash';
-const ts = require('typescript');
+import * as ts from 'typescript';
 import * as glob from 'glob';
 
 const chokidar = require('chokidar');
@@ -31,12 +30,11 @@ import { cleanNameWithoutSpaceAndToLowerCase, findMainSourceFolder } from '../ut
 import { promiseSequential } from '../utils/promise-sequential';
 import { DependenciesEngine } from './engines/dependencies.engine';
 
-let pkg = require('../package.json');
 const promisedHandlebars = require('promised-handlebars');
 let cwd = process.cwd();
 let $fileengine = new FileEngine();
 let $markdownengine = new MarkdownEngine();
-let startTime = new Date();
+let startTime = +new Date();
 
 export class Application {
     /**
@@ -566,16 +564,20 @@ export class Application {
                     ngModule[metadataType] = ngModule[metadataType].filter(metaDataItem => {
                         switch (metaDataItem.type) {
                             case 'directive':
-                                return this.dependenciesEngine.getDirectives().some(directive => directive.name === metaDataItem.name);
+                                return this.dependenciesEngine.getDirectives()
+                                    .some((directive: any) => directive.name === metaDataItem.name);
 
                             case 'component':
-                                return this.dependenciesEngine.getComponents().some(component => component.name === metaDataItem.name);
+                                return this.dependenciesEngine.getComponents()
+                                    .some((component: any) => component.name === metaDataItem.name);
 
                             case 'module':
-                                return this.dependenciesEngine.getModules().some(module => module.name === metaDataItem.name);
+                                return this.dependenciesEngine.getModules()
+                                    .some((module: any) => module.name === metaDataItem.name);
 
                             case 'pipe':
-                                return this.dependenciesEngine.getPipes().some(pipe => pipe.name === metaDataItem.name);
+                                return this.dependenciesEngine.getPipes()
+                                    .some((pipe: any) => pipe.name === metaDataItem.name);
 
                             default:
                                 return true;
@@ -583,7 +585,7 @@ export class Application {
                     });
                 });
                 ngModule.providers = ngModule.providers.filter(provider => {
-                    return this.dependenciesEngine.getInjectables().some(injectable => injectable.name === provider.name);
+                    return this.dependenciesEngine.getInjectables().some((injectable: any) => injectable.name === provider.name);
                 });
                 return ngModule;
             });
@@ -772,87 +774,66 @@ export class Application {
         });
     }
 
-    public prepareComponents(someComponents?) {
-        logger.info('Prepare components');
-        this.configuration.mainData.components = (someComponents) ? someComponents : this.dependenciesEngine.getComponents();
-
-        return new Promise((mainResolve, reject) => {
-            let i = 0;
-            let len = this.configuration.mainData.components.length;
-            let loop = () => {
-                if (i <= len - 1) {
-                    let dirname = path.dirname(this.configuration.mainData.components[i].file),
-                        handleTemplateurl = () => {
-                            return new Promise((resolve, reject) => {
-                                let templatePath = path.resolve(dirname + path.sep + this.configuration.mainData.components[i].templateUrl);
-                                if (fs.existsSync(templatePath)) {
-                                    fs.readFile(templatePath, 'utf8', (err, data) => {
-                                        if (err) {
-                                            logger.error(err);
-                                            reject();
-                                        } else {
-                                            this.configuration.mainData.components[i].templateData = data;
-                                            resolve();
-                                        }
-                                    });
-                                } else {
-                                    logger.error(`Cannot read template for ${this.configuration.mainData.components[i].name}`);
-                                }
-                            });
-                        };
-                    if ($markdownengine.hasNeighbourReadmeFile(this.configuration.mainData.components[i].file)) {
-                        logger.info(` ${this.configuration.mainData.components[i].name} has a README file, include it`);
-                        let readmeFile = $markdownengine.readNeighbourReadmeFile(this.configuration.mainData.components[i].file);
-                        this.configuration.mainData.components[i].readme = marked(readmeFile);
-                        this.configuration.addPage({
-                            path: 'components',
-                            name: this.configuration.mainData.components[i].name,
-                            id: this.configuration.mainData.components[i].id,
-                            context: 'component',
-                            component: this.configuration.mainData.components[i],
-                            depth: 1,
-                            pageType: COMPODOC_DEFAULTS.PAGE_TYPES.INTERNAL
-                        });
-                        if (this.configuration.mainData.components[i].templateUrl.length > 0) {
-                            logger.info(` ${this.configuration.mainData.components[i].name} has a templateUrl, include it`);
-                            handleTemplateurl().then(() => {
-                                i++;
-                                loop();
-                            }, (e) => {
-                                logger.error(e);
-                            });
-                        } else {
-                            i++;
-                            loop();
-                        }
+    private handleTemplateurl(component): Promise<any> {
+        return new Promise((resolve, reject) => {
+            let templatePath = path.resolve(component.file + path.sep + component.templateUrl);
+            if (fs.existsSync(templatePath)) {
+                fs.readFile(templatePath, 'utf8', (err, data) => {
+                    if (err) {
+                        logger.error(err);
+                        reject();
                     } else {
-                        this.configuration.addPage({
-                            path: 'components',
-                            name: this.configuration.mainData.components[i].name,
-                            id: this.configuration.mainData.components[i].id,
-                            context: 'component',
-                            component: this.configuration.mainData.components[i],
-                            depth: 1,
-                            pageType: COMPODOC_DEFAULTS.PAGE_TYPES.INTERNAL
-                        });
-                        if (this.configuration.mainData.components[i].templateUrl.length > 0) {
-                            logger.info(` ${this.configuration.mainData.components[i].name} has a templateUrl, include it`);
-                            handleTemplateurl().then(() => {
-                                i++;
-                                loop();
-                            }, (e) => {
-                                logger.error(e);
-                            });
-                        } else {
-                            i++;
-                            loop();
-                        }
+                        component.templateData = data;
+                        resolve();
                     }
-                } else {
-                    mainResolve();
-                }
-            };
-            loop();
+                });
+            } else {
+                logger.error(`Cannot read template for ${component.name}`);
+            }
+        });
+    }
+
+    private handleFoundComponent(components: Array<any>, index: number, mainResolve: () => void): void {
+        if (index > components.length - 1) {
+            mainResolve();
+            return;
+        }
+
+        let component = components[index];
+
+        if ($markdownengine.hasNeighbourReadmeFile(component.file)) {
+            logger.info(` ${component.name} has a README file, include it`);
+            let readmeFile = $markdownengine.readNeighbourReadmeFile(component.file);
+            component.readme = marked(readmeFile);
+        }
+
+        this.configuration.addPage({
+            path: 'components',
+            name: component.name,
+            id: component.id,
+            context: 'component',
+            component: component,
+            depth: 1,
+            pageType: COMPODOC_DEFAULTS.PAGE_TYPES.INTERNAL
+        });
+
+        if (component.templateUrl.length > 0) {
+            logger.info(` ${component.name} has a templateUrl, include it`);
+            this.handleTemplateurl(component)
+                .then(() => this.handleFoundComponent(components, index + 1, mainResolve),
+                (e) => logger.error(e));
+        } else {
+            this.handleFoundComponent(components, index + 1, mainResolve);
+        }
+    }
+
+
+    public prepareComponents(components?: Array<any>) {
+        logger.info('Prepare components');
+        this.configuration.mainData.components = (components) ? components : this.dependenciesEngine.getComponents();
+
+        return new Promise((resolve, reject) => {
+            this.handleFoundComponent(this.configuration.mainData.components, 0, resolve);
         });
     }
 
@@ -1453,7 +1434,7 @@ export class Application {
         logger.info('Copy main resources');
 
         const onComplete = () => {
-            let finalTime = (new Date() - startTime) / 1000;
+            let finalTime = (+new Date() - startTime) / 1000;
             logger.info('Documentation generated in ' + this.configuration.mainData.output +
                 ' in ' + finalTime +
                 ' seconds using ' + this.configuration.mainData.theme + ' theme');
@@ -1561,14 +1542,14 @@ export class Application {
 
     public runWebServer(folder) {
         if (!this.isWatching) {
-            LiveServer.start({
+            /*LiveServer.start({
                 root: folder,
                 open: this.configuration.mainData.open,
                 quiet: true,
                 logLevel: 0,
                 wait: 1000,
                 port: this.configuration.mainData.port
-            });
+            });*/
         }
         if (this.configuration.mainData.watch && !this.isWatching) {
             if (typeof this.files === 'undefined') {
@@ -1614,7 +1595,7 @@ export class Application {
             timerAddAndRemoveRef = setTimeout(runnerAddAndRemove, 1000);
         };
         let runnerAddAndRemove = () => {
-            startTime = new Date();
+            startTime = +new Date();
             this.generate();
         };
         let waiterChange = () => {
@@ -1622,7 +1603,7 @@ export class Application {
             timerChangeRef = setTimeout(runnerChange, 1000);
         };
         let runnerChange = () => {
-            startTime = new Date();
+            startTime = +new Date();
             this.setUpdatedFiles(this.watchChangedFiles);
             if (this.hasWatchedFilesTSFiles()) {
                 this.getMicroDependenciesData();

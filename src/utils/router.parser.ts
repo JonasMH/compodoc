@@ -301,7 +301,7 @@ export class RouterParser {
 
         // Scan each module and add parent property
         _.forEach(this.modules, (firstLoopModule) => {
-            _.forEach(firstLoopModule.importsNode, (importNode) => {
+            _.forEach(firstLoopModule.importsNode, (importNode: any) => {
                 _.forEach(this.modules, (module: any) => {
                     if (module.name === importNode.name) {
                         module.parent = firstLoopModule.name;
@@ -327,7 +327,7 @@ export class RouterParser {
                     if (!testOutputDir) {
                         outputFolder = outputFolder.replace(process.cwd(), '');
                     }
-                    fs.outputFile(path.resolve(outputFolder + path.sep + '/js/routes/routes_index.js'), result, function (err) {
+                    fs.outputFile(path.resolve(outputFolder + path.sep + '/js/routes/routes_index.js'), result, (err) => {
                         if (err) {
                             logger.error('Error during routes index file generation ', err);
                             reject(err);

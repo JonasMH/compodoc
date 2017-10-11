@@ -1,5 +1,5 @@
-const AngularAPIs = require('../src/data/api-list.json'),
-      _ = require('lodash');
+import * as _ from 'lodash';
+const apis = require('../data/api-list.json');
 
 export function finderInAngularAPIs(type: string) {
     let _result = {
@@ -7,12 +7,12 @@ export function finderInAngularAPIs(type: string) {
         data: null
     };
 
-    _.forEach(AngularAPIs, function(angularModuleAPIs, angularModule) {
-        let i = 0,
-            len = angularModuleAPIs.length;
+    _.forEach(apis, (angularModuleAPIs: any, angularModule) => {
+        let i = 0;
+        let len = angularModuleAPIs.length;
         for (i; i<len; i++) {
             if (angularModuleAPIs[i].title === type) {
-                _result.data = angularModuleAPIs[i]
+                _result.data = angularModuleAPIs[i];
             }
         }
     });

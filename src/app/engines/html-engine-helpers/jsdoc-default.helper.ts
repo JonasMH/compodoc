@@ -2,7 +2,7 @@ import { IHtmlEngineHelper } from './html-engine-helper.interface';
 import { JsdocTagInterface } from '../../interfaces/jsdoc-tag.interface';
 
 export class JsdocDefaultHelper implements IHtmlEngineHelper {
-    public helperFunc(context: any, jsdocTags: JsdocTagInterface[], options) {
+    public helperFunc(context: any, jsdocTags: any[], options) {
         if (jsdocTags) {
             let i = 0;
             let len = jsdocTags.length;

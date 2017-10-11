@@ -2,6 +2,7 @@ import * as path from 'path';
 import * as util from 'util';
 
 import * as _ from 'lodash';
+import * as ts from 'typescript';
 
 import { compilerHost, detectIndent } from '../../utilities';
 import { logger } from '../../logger';
@@ -32,8 +33,6 @@ import {
     ITypeAliasDecDep
 } from './dependencies.interfaces';
 
-
-const ts = require('typescript');
 const marked = require('marked');
 
 // TypeScript reference : https://github.com/Microsoft/TypeScript/blob/master/lib/typescript.d.ts
@@ -235,7 +234,7 @@ export class Dependencies {
         let cleaner = (process.cwd() + path.sep).replace(/\\/g, '/');
         let file = srcFile.fileName.replace(cleaner, '');
 
-        ts.forEachChild(srcFile, (node: ts.Node) => {
+        ts.forEachChild(srcFile, (node: any) => {
             if (this.jsDocHelper.hasJSDocInternalTag(file, srcFile, node) && this.configuration.mainData.disablePrivateOrInternalSupport) {
                 return;
             }
@@ -700,7 +699,7 @@ export class Dependencies {
             name: node.name.text,
             kind: node.kind
         };
-        let jsdoctags = JSDocTagsParser.getJSDocs(node);
+        let jsdoctags: Array<any> = JSDocTagsParser.getJSDocs(node);
 
         if (jsdoctags && jsdoctags.length >= 1) {
             if (jsdoctags[0].tags) {
@@ -752,7 +751,7 @@ export class Dependencies {
             name: method.name.text,
             args: method.parameters ? method.parameters.map((prop) => this.visitArgument(prop)) : []
         };
-        let jsdoctags = JSDocTagsParser.getJSDocs(method);
+        let jsdoctags: Array<any> = JSDocTagsParser.getJSDocs(method);
 
         if (typeof method.type !== 'undefined') {
             result.returnType = this.classHelper.visitType(method.type);
@@ -796,7 +795,7 @@ export class Dependencies {
     }
 
     private visitFunctionDeclarationJSDocTags(node): string {
-        let jsdoctags = JSDocTagsParser.getJSDocs(node);
+        let jsdoctags: Array<any> = JSDocTagsParser.getJSDocs(node);
         let result;
         if (jsdoctags && jsdoctags.length >= 1) {
             if (jsdoctags[0].tags) {

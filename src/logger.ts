@@ -1,6 +1,8 @@
 let gutil = require('gulp-util');
 let c = gutil.colors;
-let pkg = require('../package.json');
+
+declare var PACKAGE_NAME: string;
+declare var PACKAGE_VERSION: string;
 
 enum LEVEL {
 	INFO,
@@ -17,8 +19,8 @@ class Logger {
 	public silent;
 
 	constructor() {
-		this.name = pkg.name;
-		this.version = pkg.version;
+		this.name = PACKAGE_NAME;
+		this.version = PACKAGE_VERSION;
 		this.logger = gutil.log;
 		this.silent = true;
 	}
@@ -35,7 +37,6 @@ class Logger {
 		this.logger(
 			this.format(LEVEL.ERROR, ...args)
 		);
-		console.trace();
 	}
 
 	public warn(...args) {

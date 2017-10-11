@@ -1,10 +1,13 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
+import * as _ from 'lodash';
 
 import { logger } from '../../logger';
 import { HtmlEngineHelpers } from './html.engine.helpers';
 import { DependenciesEngine } from './dependencies.engine';
 import { ConfigurationInterface } from '../interfaces/configuration.interface';
+
+let pagePartial = require('../../templates/page.hbs');
 
 export class HtmlEngine {
     private cache: { page: any } = {} as any;
@@ -57,32 +60,13 @@ export class HtmlEngine {
             'miscellaneous-enumerations',
             'additional-page'
         ];
-        let i = 0;
-        let len = partials.length;
-        let loop = (resolve, reject) => {
-            if (i <= len - 1) {
-                fs.readFile(path.resolve(__dirname + '/../src/templates/partials/' + partials[i] + '.hbs'), 'utf8', (err, data) => {
-                    if (err) { reject(); }
-                    this.handlebars.registerPartial(partials[i], data);
-                    i++;
-                    loop(resolve, reject);
-                });
-            } else {
-                fs.readFile(path.resolve(__dirname + '/../src/templates/page.hbs'), 'utf8', (err, data) => {
-                    if (err) {
-                        reject('Error during index generation');
-                    } else {
-                        this.cache.page = data;
-                        resolve();
-                    }
-                });
-            }
-        };
 
+        /*partials.forEach((x: any) => {
+            this.handlebars.registerPartial(x.name, x.page);
+        });*/
+        this.cache.page = pagePartial;
 
-        return new Promise(function (resolve, reject) {
-            loop(resolve, reject);
-        });
+        return Promise.resolve();
     }
 
     public render(mainData: any, page: any): Promise<string> {

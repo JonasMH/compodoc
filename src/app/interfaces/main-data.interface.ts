@@ -44,4 +44,11 @@ export interface MainDataInterface {
     coverageMinimumPerFile: number;
     routesLength: number;
     angularVersion: string;
+    diagramOptions?: IDiagramOptions;
+}
+
+export interface IDiagramOptions {
+    enabled: boolean;
+    jarLocation: string;
+    configLocation?: string;
 }

@@ -1,22 +1,22 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as util from 'util';
+import * as ts from 'typescript';
+import * as _ from 'lodash';
 
 import { logger } from './logger';
 
 import { stripBom, hasBom } from './utils/utils';
 
-const carriageReturnLineFeed = '\r\n',
-      lineFeed = '\n',
-      ts = require('typescript'),
-      _ = require('lodash');
+const carriageReturnLineFeed = '\r\n';
+const lineFeed = '\n';
 
 export function cleanNameWithoutSpaceAndToLowerCase(name: string): string {
     return name.toLowerCase().replace(/ /g, '-');
 }
 
 export function detectIndent(str, count, indent?): string {
-    let stripIndent = function(str: string) {
+    let stripIndent = function (str: string) {
         const match = str.match(/^[ \t]*(?=\S)/gm);
 
         if (!match) {
@@ -28,8 +28,8 @@ export function detectIndent(str, count, indent?): string {
         const re = new RegExp(`^[ \\t]{${indent}}`, 'gm');
 
         return indent > 0 ? str.replace(re, '') : str;
-    },
-        repeating = function(n, str) {
+    };
+    let repeating = function (n, str) {
         str = str === undefined ? ' ' : str;
 
         if (typeof str !== 'string') {
@@ -51,8 +51,8 @@ export function detectIndent(str, count, indent?): string {
         } while ((n >>= 1));
 
         return ret;
-    },
-    indentString = function(str, count, indent) {
+    };
+    let indentString = function (str, count, indent) {
         indent = indent === undefined ? ' ' : indent;
         count = count === undefined ? 1 : count;
 
@@ -75,7 +75,7 @@ export function detectIndent(str, count, indent?): string {
         indent = count > 1 ? repeating(count, indent) : indent;
 
         return str.replace(/^(?!\s*$)/mg, indent);
-    }
+    };
 
     return indentString(stripIndent(str), count || 0, indent);
 }
@@ -111,7 +111,7 @@ export function compilerHost(transpileOptions: any): ts.CompilerHost {
                         libSource = stripBom(libSource);
                     }
                 }
-                catch(e) {
+                catch (e) {
                     logger.debug(e, fileName);
                 }
 
@@ -119,7 +119,7 @@ export function compilerHost(transpileOptions: any): ts.CompilerHost {
             }
             return undefined;
         },
-        writeFile: (name, text) => {},
+        writeFile: (name, text) => { },
         getDefaultLibFileName: () => 'lib.d.ts',
         useCaseSensitiveFileNames: () => false,
         getCanonicalFileName: fileName => fileName,
@@ -134,17 +134,17 @@ export function compilerHost(transpileOptions: any): ts.CompilerHost {
 }
 
 export function findMainSourceFolder(files: string[]) {
-    let mainFolder = '',
-        mainFolderCount = 0,
-        rawFolders = files.map((filepath) => {
-            var shortPath = filepath.replace(process.cwd() + path.sep, '');
-            return path.dirname(shortPath);
-        }),
-        folders = {},
-        i = 0;
+    let mainFolder = '';
+    let mainFolderCount = 0;
+    let rawFolders = files.map((filepath) => {
+        let shortPath = filepath.replace(process.cwd() + path.sep, '');
+        return path.dirname(shortPath);
+    });
+    let folders = {};
+    let i = 0;
     rawFolders = _.uniq(rawFolders);
     let len = rawFolders.length;
-    for(i; i<len; i++){
+    for (i; i < len; i++) {
         let sep = rawFolders[i].split(path.sep);
         sep.map((folder) => {
             if (folders[folder]) {
@@ -152,10 +152,10 @@ export function findMainSourceFolder(files: string[]) {
             } else {
                 folders[folder] = 1;
             }
-        })
+        });
     }
     for (let f in folders) {
-        if(folders[f] > mainFolderCount) {
+        if (folders[f] > mainFolderCount) {
             mainFolderCount = folders[f];
             mainFolder = f;
         }
